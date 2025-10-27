@@ -200,6 +200,7 @@ async function toggleLocation() {
                   id="cameraName"
                   v-model="cameraForm.name"
                   placeholder="Contax T2"
+                  class="w-full"
                 />
               </UFormField>
               <UButton color="primary" block @click="submitCamera"
@@ -260,6 +261,7 @@ async function toggleLocation() {
                   id="lensName"
                   v-model="lensForm.name"
                   placeholder="Zeiss 45mm"
+                  class="w-full"
                 />
               </UFormField>
               <UFormField
@@ -274,6 +276,7 @@ async function toggleLocation() {
                   min="1"
                   step="0.1"
                   placeholder="45"
+                  class="w-full"
                 />
               </UFormField>
               <UButton color="primary" block @click="submitLens"
@@ -340,6 +343,7 @@ async function toggleLocation() {
                   id="filmName"
                   v-model="filmForm.name"
                   placeholder="Portra 400"
+                  class="w-full"
                 />
               </UFormField>
               <UFormField label="ISO" name="filmIso">
@@ -348,6 +352,7 @@ async function toggleLocation() {
                   v-model="filmForm.iso"
                   type="number"
                   min="1"
+                  class="w-full"
                 />
               </UFormField>
               <UFormField label="Format" name="filmFormat">
@@ -355,6 +360,7 @@ async function toggleLocation() {
                   id="filmFormat"
                   v-model="filmForm.format"
                   placeholder="35mm, 120, large format"
+                  class="w-full"
                 />
               </UFormField>
               <UButton color="primary" block @click="submitFilm"
