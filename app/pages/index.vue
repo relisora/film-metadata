@@ -3,7 +3,7 @@ import { computed, reactive, ref, watch } from "vue";
 
 const { settings, currentCamera, currentLens, currentFilmStock } =
   useFilmSettings();
-const { exposures, addExposure, removeExposure } = useExposureLog();
+const { exposures, addExposure } = useExposureLog();
 const toast = useToast();
 
 const isModalOpen = ref(false);
@@ -64,12 +64,6 @@ const customAperture = ref("");
 const formatFocalLength = (value?: number | null) =>
   value === undefined || value === null ? "" : `${value.toString()} mm`;
 
-const sortedExposures = computed(() =>
-  [...exposures.value].sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-  )
-);
-
 watch(
   selectedShutterSpeed,
   (value) => {
@@ -99,21 +93,6 @@ watch(customAperture, (value) => {
     formState.aperture = value;
   }
 });
-
-const formatDate = (timestamp: string) =>
-  new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(timestamp));
-
-const formatLocation = (location: {
-  latitude: number;
-  longitude: number;
-  accuracy: number;
-}) =>
-  `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(
-    5
-  )} (±${Math.round(location.accuracy)} m)`;
 
 function openModal() {
   formState.note = "";
@@ -158,11 +137,6 @@ async function handleSave() {
   } finally {
     isSaving.value = false;
   }
-}
-
-function handleDelete(id: string) {
-  removeExposure(id);
-  toast.add({ title: "Exposure removed" });
 }
 </script>
 
@@ -222,71 +196,27 @@ function handleDelete(id: string) {
       </dl>
     </UCard>
 
-    <section class="space-y-3">
-      <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold">Recent exposures</h2>
-        <span class="text-sm text-gray-500 dark:text-gray-400"
-          >{{ exposures.length }} total</span
-        >
-      </div>
+    <UCard>
+      <template #header>
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold">Exposure history</h2>
+          <UBadge color="neutral" variant="soft"
+            >{{ exposures.length }} logged</UBadge
+          >
+        </div>
+      </template>
 
-      <div v-if="sortedExposures.length" class="space-y-3">
-        <UCard v-for="entry in sortedExposures" :key="entry.id">
-          <div class="flex items-start justify-between gap-3">
-            <div class="space-y-2">
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ formatDate(entry.timestamp) }}
-              </p>
-              <div class="space-y-1">
-                <p class="font-medium">
-                  {{ entry.cameraName || "Camera not set" }}
-                </p>
-                <p class="text-sm text-gray-600 dark:text-gray-300">
-                  <span v-if="entry.lensName">Lens: {{ entry.lensName }}</span>
-                  <span v-if="entry.lensFocalLength !== undefined" class="ml-2">
-                    Focal: {{ formatFocalLength(entry.lensFocalLength) }}
-                  </span>
-                  <span v-if="entry.shutterSpeed" class="ml-2"
-                    >Shutter: {{ entry.shutterSpeed }}</span
-                  >
-                  <span v-if="entry.aperture" class="ml-2"
-                    >Aperture: {{ entry.aperture }}</span
-                  >
-                </p>
-                <p
-                  v-if="entry.filmStockName"
-                  class="text-sm text-gray-600 dark:text-gray-300"
-                >
-                  Film: {{ entry.filmStockName
-                  }}<span v-if="entry.filmStockIso">
-                    · ISO {{ entry.filmStockIso }}</span
-                  >
-                </p>
-                <p
-                  v-if="entry.note"
-                  class="text-sm text-gray-600 dark:text-gray-300"
-                >
-                  {{ entry.note }}
-                </p>
-                <p v-if="entry.location" class="text-xs text-gray-500">
-                  {{ formatLocation(entry.location) }}
-                </p>
-              </div>
-            </div>
-            <UButton
-              color="error"
-              variant="ghost"
-              size="xs"
-              icon="i-ph-trash"
-              @click="handleDelete(entry.id)"
-            />
-          </div>
-        </UCard>
+      <div
+        class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+          Review and manage past exposures on the dedicated history page.
+        </p>
+        <UButton to="/exposures" color="primary" variant="soft">
+          View history
+        </UButton>
       </div>
-      <UAlert v-else icon="i-ph-info" color="primary" variant="soft">
-        Tap “Log exposure” to add your first frame.
-      </UAlert>
-    </section>
+    </UCard>
 
     <ClientOnly>
       <UModal v-model:open="isModalOpen" :dismissible="false">

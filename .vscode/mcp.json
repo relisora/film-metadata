@@ -1,9 +1,17 @@
 {
-	"servers": {
-		"my-mcp-server-8c2c980d": {
-			"url": "http://localhost:3000/__mcp/sse",
-			"type": "http"
-		}
-	},
-	"inputs": []
+  "servers": {
+    "my-mcp-server-8c2c980d": {
+      "url": "http://localhost:3000/__mcp/sse",
+      "type": "http"
+    },
+    "nuxt": {
+      "type": "sse",
+      "url": "http://localhost:3000/__mcp/sse"
+    },
+    "nuxt-docs": {
+      "type": "sse",
+      "url": "https://mcp.nuxt.com/sse"
+    }
+  },
+  "inputs": []
 }

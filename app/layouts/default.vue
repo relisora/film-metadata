@@ -8,6 +8,9 @@
         </div>
         <nav class="flex items-center gap-2">
           <UButton to="/" variant="ghost" color="primary">Log</UButton>
+          <UButton to="/exposures" variant="ghost" color="primary"
+            >History</UButton
+          >
           <UButton to="/settings" variant="ghost" color="primary"
             >Settings</UButton
           >
