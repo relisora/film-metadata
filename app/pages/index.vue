@@ -196,109 +196,75 @@ async function handleSave() {
       </dl>
     </UCard>
 
-    <UCard>
-      <template #header>
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold">Exposure history</h2>
-          <UBadge color="neutral" variant="soft"
-            >{{ exposures.length }} logged</UBadge
-          >
-        </div>
-      </template>
-
-      <div
-        class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <p class="text-sm text-gray-600 dark:text-gray-300">
-          Review and manage past exposures on the dedicated history page.
-        </p>
-        <UButton to="/exposures" color="primary" variant="soft">
-          View history
-        </UButton>
-      </div>
-    </UCard>
-
     <ClientOnly>
-      <UModal v-model:open="isModalOpen" :dismissible="false">
-        <template #content>
-          <UCard>
-            <template #header>
-              <div class="flex items-center justify-between">
-                <h3 class="text-lg font-semibold">Exposure details</h3>
-                <UButton
-                  icon="i-ph-x"
-                  variant="ghost"
-                  :disabled="isSaving"
-                  @click="isModalOpen = false"
+      <UModal
+        v-model:open="isModalOpen"
+        :dismissible="false"
+        title="Exposure details"
+        close-icon="i-ph-x"
+        :close="{ variant: 'ghost', disabled: isSaving }"
+        :ui="{ body: 'space-y-4' }"
+      >
+        <template #body>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <UFormField label="Shutter speed" name="shutterSpeed">
+              <div class="space-y-2">
+                <USelectMenu
+                  v-model="selectedShutterSpeed"
+                  :items="shutterSpeedOptions"
+                  value-key="value"
+                  placeholder="Select shutter speed"
+                />
+                <UInput
+                  v-if="selectedShutterSpeed === CUSTOM_SHUTTER_VALUE"
+                  id="shutterSpeedCustom"
+                  v-model="customShutterSpeed"
+                  placeholder="Custom shutter speed"
                 />
               </div>
-            </template>
-
-            <div class="space-y-4">
-              <div class="grid gap-4 sm:grid-cols-2">
-                <UFormField label="Shutter speed" name="shutterSpeed">
-                  <div class="space-y-2">
-                    <USelectMenu
-                      v-model="selectedShutterSpeed"
-                      :items="shutterSpeedOptions"
-                      value-key="value"
-                      placeholder="Select shutter speed"
-                    />
-                    <UInput
-                      v-if="selectedShutterSpeed === CUSTOM_SHUTTER_VALUE"
-                      id="shutterSpeedCustom"
-                      v-model="customShutterSpeed"
-                      placeholder="Custom shutter speed"
-                    />
-                  </div>
-                </UFormField>
-                <UFormField label="Aperture" name="aperture">
-                  <div class="space-y-2">
-                    <USelectMenu
-                      v-model="selectedAperture"
-                      :items="apertureOptions"
-                      value-key="value"
-                      placeholder="Select aperture"
-                    />
-                    <UInput
-                      v-if="selectedAperture === CUSTOM_APERTURE_VALUE"
-                      id="apertureCustom"
-                      v-model="customAperture"
-                      placeholder="Custom aperture"
-                    />
-                  </div>
-                </UFormField>
-              </div>
-
-              <UFormField label="Notes" name="note">
-                <UTextarea
-                  id="note"
-                  v-model="formState.note"
-                  placeholder="Lighting, scene notes, metering details..."
-                  :rows="3"
-                  auto-resize
+            </UFormField>
+            <UFormField label="Aperture" name="aperture">
+              <div class="space-y-2">
+                <USelectMenu
+                  v-model="selectedAperture"
+                  :items="apertureOptions"
+                  value-key="value"
+                  placeholder="Select aperture"
                 />
-              </UFormField>
-            </div>
-
-            <template #footer>
-              <div class="flex justify-end gap-2">
-                <UButton
-                  variant="ghost"
-                  :disabled="isSaving"
-                  @click="isModalOpen = false"
-                  >Cancel</UButton
-                >
-                <UButton
-                  color="primary"
-                  :loading="isSaving"
-                  @click="handleSave"
-                >
-                  Save exposure
-                </UButton>
+                <UInput
+                  v-if="selectedAperture === CUSTOM_APERTURE_VALUE"
+                  id="apertureCustom"
+                  v-model="customAperture"
+                  placeholder="Custom aperture"
+                />
               </div>
-            </template>
-          </UCard>
+            </UFormField>
+          </div>
+
+          <UFormField label="Notes" name="note">
+            <UTextarea
+              id="note"
+              v-model="formState.note"
+              placeholder="Lighting, scene notes, metering details..."
+              :rows="3"
+              auto-resize
+            />
+          </UFormField>
+        </template>
+
+        <template #footer>
+          <div class="flex justify-end gap-2">
+            <UButton
+              variant="ghost"
+              :disabled="isSaving"
+              @click="isModalOpen = false"
+            >
+              Cancel
+            </UButton>
+            <UButton color="primary" :loading="isSaving" @click="handleSave">
+              Save exposure
+            </UButton>
+          </div>
         </template>
       </UModal>
     </ClientOnly>

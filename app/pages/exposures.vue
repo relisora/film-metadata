@@ -43,7 +43,6 @@ function handleDelete(id: string) {
           Review and manage your logged frames.
         </p>
       </div>
-      <UButton to="/" color="primary">Log new exposure</UButton>
     </div>
 
     <div v-if="sortedExposures.length" class="space-y-3">
