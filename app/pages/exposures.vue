@@ -36,71 +36,78 @@ function handleDelete(id: string) {
 
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-xl font-semibold">Exposure history</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          Review and manage your logged frames.
-        </p>
-      </div>
-    </div>
-
-    <div v-if="sortedExposures.length" class="space-y-3">
-      <UCard v-for="entry in sortedExposures" :key="entry.id">
-        <div class="flex items-start justify-between gap-3">
-          <div class="space-y-2">
+    <UCard>
+      <template #header>
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-xl font-semibold">Exposure history</h1>
             <p class="text-sm text-gray-500 dark:text-gray-400">
-              {{ formatDate(entry.timestamp) }}
+              Review and manage your logged frames.
             </p>
-            <div class="space-y-1">
-              <p class="font-medium">
-                {{ entry.cameraName || "Camera not set" }}
-              </p>
-              <p class="text-sm text-gray-600 dark:text-gray-300">
-                <span v-if="entry.lensName">Lens: {{ entry.lensName }}</span>
-                <span v-if="entry.lensFocalLength !== undefined" class="ml-2">
-                  Focal: {{ formatFocalLength(entry.lensFocalLength) }}
-                </span>
-                <span v-if="entry.shutterSpeed" class="ml-2"
-                  >Shutter: {{ entry.shutterSpeed }}</span
-                >
-                <span v-if="entry.aperture" class="ml-2"
-                  >Aperture: {{ entry.aperture }}</span
-                >
-              </p>
-              <p
-                v-if="entry.filmStockName"
-                class="text-sm text-gray-600 dark:text-gray-300"
-              >
-                Film: {{ entry.filmStockName
-                }}<span v-if="entry.filmStockIso">
-                  · ISO {{ entry.filmStockIso }}</span
-                >
-              </p>
-              <p
-                v-if="entry.note"
-                class="text-sm text-gray-600 dark:text-gray-300"
-              >
-                {{ entry.note }}
-              </p>
-              <p v-if="entry.location" class="text-xs text-gray-500">
-                {{ formatLocation(entry.location) }}
-              </p>
-            </div>
           </div>
-          <UButton
-            color="error"
-            variant="ghost"
-            size="xs"
-            icon="i-ph-trash"
-            @click="handleDelete(entry.id)"
-          />
+          <UBadge color="neutral" variant="soft">
+            {{ sortedExposures.length }} logged
+          </UBadge>
         </div>
-      </UCard>
-    </div>
-    <UAlert v-else icon="i-ph-info" color="primary" variant="soft">
-      No exposures logged yet. Start with the “Log exposure” button on the home
-      page.
-    </UAlert>
+      </template>
+
+      <div v-if="sortedExposures.length" class="space-y-3">
+        <UCard v-for="entry in sortedExposures" :key="entry.id" variant="soft">
+          <div class="flex items-start justify-between gap-3">
+            <div class="space-y-2">
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                {{ formatDate(entry.timestamp) }}
+              </p>
+              <div class="space-y-1">
+                <p class="font-medium">
+                  {{ entry.cameraName || "Camera not set" }}
+                </p>
+                <p class="text-sm text-gray-600 dark:text-gray-300">
+                  <span v-if="entry.lensName">Lens: {{ entry.lensName }}</span>
+                  <span v-if="entry.lensFocalLength !== undefined" class="ml-2">
+                    Focal: {{ formatFocalLength(entry.lensFocalLength) }}
+                  </span>
+                  <span v-if="entry.shutterSpeed" class="ml-2"
+                    >Shutter: {{ entry.shutterSpeed }}</span
+                  >
+                  <span v-if="entry.aperture" class="ml-2"
+                    >Aperture: {{ entry.aperture }}</span
+                  >
+                </p>
+                <p
+                  v-if="entry.filmStockName"
+                  class="text-sm text-gray-600 dark:text-gray-300"
+                >
+                  Film: {{ entry.filmStockName
+                  }}<span v-if="entry.filmStockIso">
+                    · ISO {{ entry.filmStockIso }}</span
+                  >
+                </p>
+                <p
+                  v-if="entry.note"
+                  class="text-sm text-gray-600 dark:text-gray-300"
+                >
+                  {{ entry.note }}
+                </p>
+                <p v-if="entry.location" class="text-xs text-gray-500">
+                  {{ formatLocation(entry.location) }}
+                </p>
+              </div>
+            </div>
+            <UButton
+              color="error"
+              variant="ghost"
+              size="xs"
+              icon="i-ph-trash"
+              @click="handleDelete(entry.id)"
+            />
+          </div>
+        </UCard>
+      </div>
+      <UAlert v-else icon="i-ph-info" color="primary" variant="soft">
+        No exposures logged yet. Start with the “Log exposure” button on the
+        home page.
+      </UAlert>
+    </UCard>
   </div>
 </template>

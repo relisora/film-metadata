@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
 
-const { settings, currentCamera, currentLens, currentFilmStock } =
-  useFilmSettings();
+const {
+  settings,
+  currentCamera,
+  currentLens,
+  currentFilmStock,
+  setCurrentLens,
+} = useFilmSettings();
 const { exposures, addExposure } = useExposureLog();
 const toast = useToast();
 
@@ -56,13 +61,22 @@ const apertureOptions = computed(() =>
   }))
 );
 
+const lensOptions = computed(() =>
+  settings.value.lenses.map((lens) => ({
+    id: lens.id,
+    label: lens.focalLength
+      ? `${lens.name} (${lens.focalLength} mm)`
+      : lens.name,
+  }))
+);
+
+const hasLenses = computed(() => lensOptions.value.length > 0);
+
+const selectedLensId = ref<string | undefined>(currentLens.value?.id);
 const selectedShutterSpeed = ref<string>("");
 const customShutterSpeed = ref("");
 const selectedAperture = ref<string>("");
 const customAperture = ref("");
-
-const formatFocalLength = (value?: number | null) =>
-  value === undefined || value === null ? "" : `${value.toString()} mm`;
 
 watch(
   selectedShutterSpeed,
@@ -94,13 +108,34 @@ watch(customAperture, (value) => {
   }
 });
 
+watch(currentLens, (lens) => {
+  if (!isModalOpen.value) {
+    selectedLensId.value = lens?.id;
+  }
+});
+
+watch(selectedLensId, (id) => {
+  setCurrentLens(id);
+});
+
 function openModal() {
   formState.note = "";
   customShutterSpeed.value = "";
   customAperture.value = "";
+  selectedLensId.value = currentLens.value?.id;
   selectedShutterSpeed.value = "";
   selectedAperture.value = "";
   isModalOpen.value = true;
+}
+
+function clearShutterSelection() {
+  selectedShutterSpeed.value = "";
+  customShutterSpeed.value = "";
+}
+
+function clearApertureSelection() {
+  selectedAperture.value = "";
+  customAperture.value = "";
 }
 
 async function handleSave() {
@@ -151,33 +186,16 @@ async function handleSave() {
               Current setup and recent exposure activity.
             </p>
           </div>
-          <UButton color="primary" size="lg" @click="openModal">
-            Log exposure
-          </UButton>
         </div>
       </template>
 
       <dl class="grid gap-4 sm:grid-cols-2">
         <div>
-          <dt class="text-sm text-gray-500 dark:text-gray-400">Camera</dt>
           <dd class="text-base font-medium">
             {{ currentCamera?.name || "Not selected" }}
           </dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500 dark:text-gray-400">Lens</dt>
-          <dd class="text-base font-medium">
-            {{ currentLens?.name || "Not selected" }}
-            <span
-              v-if="currentLens?.focalLength !== undefined"
-              class="text-sm text-gray-500"
-            >
-              · {{ formatFocalLength(currentLens.focalLength) }}
-            </span>
-          </dd>
-        </div>
-        <div>
-          <dt class="text-sm text-gray-500 dark:text-gray-400">Film stock</dt>
           <dd class="text-base font-medium">
             {{ currentFilmStock?.name || "Not selected" }}
             <span v-if="currentFilmStock" class="text-sm text-gray-500">
@@ -186,15 +204,25 @@ async function handleSave() {
           </dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500 dark:text-gray-400">
-            Location capture
-          </dt>
           <dd class="text-base font-medium">
-            {{ settings.locationEnabled ? "Enabled" : "Disabled" }}
+            Location {{ settings.locationEnabled ? "Enabled" : "Disabled" }}
+          </dd>
+        </div>
+        <div>
+          <dd class="text-base font-medium">
+            {{ exposures.length }} Frame(s) logged
           </dd>
         </div>
       </dl>
     </UCard>
+    <UButton
+      color="primary"
+      size="xl"
+      class="w-full py-4 text-base font-semibold"
+      @click="openModal"
+    >
+      Log exposure
+    </UButton>
 
     <ClientOnly>
       <UModal
@@ -206,36 +234,83 @@ async function handleSave() {
         :ui="{ body: 'space-y-4' }"
       >
         <template #body>
+          <UFormField label="Lens" name="lens">
+            <div class="space-y-1">
+              <USelectMenu
+                v-model="selectedLensId"
+                :items="lensOptions"
+                value-key="id"
+                placeholder="Select lens"
+                size="lg"
+                class="w-full"
+                :disabled="!hasLenses"
+              />
+              <p v-if="!hasLenses" class="text-xs text-gray-500">
+                Add lenses in Settings to pick them here.
+              </p>
+            </div>
+          </UFormField>
+
           <div class="grid gap-4 sm:grid-cols-2">
             <UFormField label="Shutter speed" name="shutterSpeed">
               <div class="space-y-2">
-                <USelectMenu
-                  v-model="selectedShutterSpeed"
-                  :items="shutterSpeedOptions"
-                  value-key="value"
-                  placeholder="Select shutter speed"
-                />
+                <div class="flex items-center gap-2">
+                  <USelectMenu
+                    v-model="selectedShutterSpeed"
+                    :items="shutterSpeedOptions"
+                    value-key="value"
+                    placeholder="Select shutter speed"
+                    size="lg"
+                    class="flex-1"
+                  />
+                  <UButton
+                    v-if="selectedShutterSpeed"
+                    icon="i-ph-x"
+                    variant="ghost"
+                    color="neutral"
+                    size="xs"
+                    class="self-stretch"
+                    aria-label="Clear shutter speed"
+                    @click="clearShutterSelection"
+                  />
+                </div>
                 <UInput
                   v-if="selectedShutterSpeed === CUSTOM_SHUTTER_VALUE"
                   id="shutterSpeedCustom"
                   v-model="customShutterSpeed"
                   placeholder="Custom shutter speed"
+                  class="w-full"
                 />
               </div>
             </UFormField>
             <UFormField label="Aperture" name="aperture">
               <div class="space-y-2">
-                <USelectMenu
-                  v-model="selectedAperture"
-                  :items="apertureOptions"
-                  value-key="value"
-                  placeholder="Select aperture"
-                />
+                <div class="flex items-center gap-2">
+                  <USelectMenu
+                    v-model="selectedAperture"
+                    :items="apertureOptions"
+                    value-key="value"
+                    placeholder="Select aperture"
+                    size="lg"
+                    class="flex-1"
+                  />
+                  <UButton
+                    v-if="selectedAperture"
+                    icon="i-ph-x"
+                    variant="ghost"
+                    color="neutral"
+                    size="xs"
+                    class="self-stretch"
+                    aria-label="Clear aperture"
+                    @click="clearApertureSelection"
+                  />
+                </div>
                 <UInput
                   v-if="selectedAperture === CUSTOM_APERTURE_VALUE"
                   id="apertureCustom"
                   v-model="customAperture"
                   placeholder="Custom aperture"
+                  class="w-full"
                 />
               </div>
             </UFormField>
@@ -248,6 +323,7 @@ async function handleSave() {
               placeholder="Lighting, scene notes, metering details..."
               :rows="3"
               auto-resize
+              class="w-full"
             />
           </UFormField>
         </template>
