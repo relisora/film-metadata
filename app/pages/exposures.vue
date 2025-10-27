@@ -46,7 +46,7 @@ function handleDelete(id: string) {
             </p>
           </div>
           <UBadge color="neutral" variant="soft">
-            {{ sortedExposures.length }} logged
+            {{ sortedExposures.length }}
           </UBadge>
         </div>
       </template>

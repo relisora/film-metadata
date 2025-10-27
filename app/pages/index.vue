@@ -218,7 +218,7 @@ async function handleSave() {
     <UButton
       color="primary"
       size="xl"
-      class="w-full py-4 text-base font-semibold"
+      class="w-full py-4 text-base font-semibold justify-center text-center"
       @click="openModal"
     >
       Log exposure
